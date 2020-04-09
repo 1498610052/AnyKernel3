@@ -1,0 +1,287 @@
+# qcom sdm845 by stickernel
+# date:20200408-11-TianJin-CAF
+# 该文件非专业人士请不要进行修改，否则会带来严重问题.
+on post-fs-data
+	# SELinux控制,默认关闭.
+	write /sys/fs/selinux/enforce 0
+	# 设置一些默认的系统参数值
+	setprop spectrum.support 1
+	setprop persist.spectrum.profile 1
+   	setprop persist.spectrum.kernel SticKernel
+   	setprop dalvik.vm.heapminfree 2m
+   	setprop sys.use_fifo_ui 1
+   	setprop video.accelerate.hw 1
+   	# setprop ro.sys.fw.dex2oat_thread_count 8
+	# setprop dalvik.vm.dex2oat-threads 8
+    # setprop dalvik.vm.image-dex2oat-threads 8
+	setprop persist.sys.perf.debug false
+	setprop ro.vendor.audio.surround.support true
+	setprop ro.vendor.audio.vocal.support true
+	setprop ro.vendor.audio.spk.stereo true
+	setprop ro.vendor.audio.sfx.spk.stereo true
+   	setprop ro.HOME_APP_ADJ 1
+ 
+on property:sys.boot_completed=1
+	# 网络性能调优
+	write /sys/kernel/ipv4/tcp_rmem_min 524288
+	write /sys/kernel/ipv4/tcp_rmem_def 2097152
+	write /sys/kernel/ipv4/tcp_rmem_max 5505024
+	write /sys/kernel/ipv4/tcp_wmem_min 262144
+	write /sys/kernel/ipv4/tcp_wmem_def 4194034
+	write /sys/kernel/ipv4/tcp_wmem_max 8388608
+	write /proc/sys/net/core/rmem_default 524288
+	write /proc/sys/net/core/rmem_max 8388608
+	write /proc/sys/net/core/wmem_default 262992
+	write /proc/sys/net/core/wmem_max 8388608
+	# 应用一些默认参数的文件
+	exec u:r:magisk:s0 root root -- /sbin/perf.sh
+	# 应用扩容电池脚本的文件
+	exec u:r:magisk:s0 root root -- /sbin/sticsystem.sh
+
+# 频谱调度
+
+# 均衡模式(偏向省电)
+on property:persist.spectrum.profile=1
+		write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor "schedutil"
+		write /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq "1766400"
+		write /sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq "2649600"
+		write /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq "480000"
+		write /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor "schedutil"
+		write /sys/devices/system/cpu/cpufreq/policy0/schedutil/powersave "1"
+		write /sys/devices/system/cpu/cpufreq/policy4/schedutil/powersave "0"
+		write /sys/devices/system/cpu/cpufreq/policy0/schedutil/performance "0"
+		write /sys/devices/system/cpu/cpufreq/policy4/schedutil/performance "0"
+		write /sys/module/cpu_input_boost/parameters/input_boost_freq_lp "1324800"
+		write /sys/module/cpu_input_boost/parameters/remove_input_boost_freq_lp "480000"
+		write /sys/module/cpu_input_boost/parameters/dynamic_stune_boost "15"
+		write /sys/module/cpu_input_boost/parameters/input_boost_duration "120"
+		write /sys/module/cpu_input_boost/parameters/wake_boost_duration "0"
+		write /sys/devices/system/cpu/cpufreq/policy0/schedutil/iowait_boost_enable "1"
+		write /sys/devices/system/cpu/cpufreq/policy4/schedutil/iowait_boost_enable "1"
+		write /sys/devices/system/cpu/cpufreq/policy0/schedutil/up_rate_limit_us "500"
+		write /sys/devices/system/cpu/cpufreq/policy0/schedutil/down_rate_limit_us "2000"
+		write /sys/devices/system/cpu/cpufreq/policy4/schedutil/up_rate_limit_us "500"
+		write /sys/devices/system/cpu/cpufreq/policy4/schedutil/down_rate_limit_us "2000"
+		# write /sys/devices/system/cpu/cpu0/cpufreq/schedutil/up_rate_limit_us "500"
+		# write /sys/devices/system/cpu/cpu4/cpufreq/schedutil/up_rate_limit_us "500"
+		# write /sys/devices/system/cpu/cpu0/cpufreq/schedutil/down_rate_limit_us "2000"
+		# write /sys/devices/system/cpu/cpu4/cpufreq/schedutil/down_rate_limit_us "2000"
+		write /sys/module/msm_performance/parameters/touchboost "0"
+		write /sys/module/drm/parameters/frame_boost "N"
+		write /sys/block/sda/queue/read_ahead_kb "128"
+		write /sys/block/sda/queue/scheduler "cfq"
+		write /sys/class/kgsl/kgsl-3d0/max_gpuclk "720000000"
+		write /sys/class/kgsl/kgsl-3d0/devfreq/min_freq "180000000"
+		write /sys/class/kgsl/kgsl-3d0/default_pwrlevel 7
+		write /sys/class/kgsl/kgsl-3d0/max_pwrlevel 1
+		write /sys/class/kgsl/kgsl-3d0/min_pwrlevel 8
+		write /sys/module/sync/parameters/fsync_enabled Y
+		write /sys/class/kgsl/kgsl-3d0/devfreq/adrenoboost 0
+		# start /vendor/bin/thermal-engine
+		# write /sys/kernel/sound_control/mic_gain "1"
+		# write /sys/module/msm_drm/parameters/backlight_max "4095"
+		# write /sys/module/msm_drm/parameters/framerate_override "0"
+		# write /sys/class/leds/vibrator/vmax_override "1"
+		# write /sys/module/msm_hotplug/max_cpus_online_susp "1"
+		# write /sys/module/msm_hotplug/io_is_busy "0"
+		# write /sys/module/msm_hotplug/offline_load "0"
+		# write /sys/module/msm_hotplug/fast_lane_load "200"
+		# write /sys/module/msm_hotplug/cpus_boosted "3"
+		# write /sys/module/msm_hotplug/min_cpus_online "1"
+		
+# 均衡模式(偏向性能)
+on property:persist.spectrum.profile=2
+		write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor "schedutil"
+		write /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq "1766400"
+		write /sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq "2803200"
+		write /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq "576000"
+		write /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor "schedutil"
+		write /sys/devices/system/cpu/cpufreq/policy0/schedutil/powersave "0"
+		write /sys/devices/system/cpu/cpufreq/policy4/schedutil/powersave "0"
+		write /sys/devices/system/cpu/cpufreq/policy0/schedutil/performance "0"
+		write /sys/devices/system/cpu/cpufreq/policy4/schedutil/performance "0"
+		write /sys/module/cpu_input_boost/parameters/input_boost_freq_lp "1324800"
+		write /sys/module/cpu_input_boost/parameters/remove_input_boost_freq_lp "576000"
+		write /sys/module/cpu_input_boost/parameters/dynamic_stune_boost "40"
+		write /sys/module/cpu_input_boost/parameters/input_boost_duration "180"
+		write /sys/module/cpu_input_boost/parameters/wake_boost_duration "0"
+		write /sys/devices/system/cpu/cpufreq/policy0/schedutil/iowait_boost_enable "1"
+		write /sys/devices/system/cpu/cpufreq/policy4/schedutil/iowait_boost_enable "1"
+		write /sys/devices/system/cpu/cpufreq/policy0/schedutil/up_rate_limit_us "500"
+		write /sys/devices/system/cpu/cpufreq/policy0/schedutil/down_rate_limit_us "20000"
+		write /sys/devices/system/cpu/cpufreq/policy4/schedutil/up_rate_limit_us "500"
+		write /sys/devices/system/cpu/cpufreq/policy4/schedutil/down_rate_limit_us "20000"
+		# write /sys/devices/system/cpu/cpu0/cpufreq/schedutil/up_rate_limit_us "500"
+		# write /sys/devices/system/cpu/cpu4/cpufreq/schedutil/up_rate_limit_us "500"
+		# write /sys/devices/system/cpu/cpu0/cpufreq/schedutil/down_rate_limit_us "2000"
+		# write /sys/devices/system/cpu/cpu4/cpufreq/schedutil/down_rate_limit_us "2000"
+		write /sys/module/msm_performance/parameters/touchboost "0"
+		write /sys/module/drm/parameters/frame_boost "Y"
+		write /sys/block/sda/queue/read_ahead_kb "128"
+		write /sys/block/sda/queue/scheduler "cfq"
+		write /sys/class/kgsl/kgsl-3d0/max_gpuclk "810000000"
+		write /sys/class/kgsl/kgsl-3d0/devfreq/min_freq "257000000"
+		write /sys/class/kgsl/kgsl-3d0/default_pwrlevel 7
+		write /sys/class/kgsl/kgsl-3d0/max_pwrlevel 0
+		write /sys/class/kgsl/kgsl-3d0/min_pwrlevel 7
+		write /sys/module/sync/parameters/fsync_enabled Y
+		write /sys/class/kgsl/kgsl-3d0/devfreq/adrenoboost 0
+		# start /vendor/bin/thermal-engine
+		# write /sys/kernel/sound_control/mic_gain "1"
+		# write /sys/module/msm_drm/parameters/backlight_max "4100"
+		# write /sys/module/msm_drm/parameters/framerate_override "0"
+		# write /sys/class/leds/vibrator/vmax_override "1"
+		# write /sys/module/msm_hotplug/max_cpus_online_susp "1"
+		# write /sys/module/msm_hotplug/io_is_busy "0"
+		# write /sys/module/msm_hotplug/offline_load "0"
+		# write /sys/module/msm_hotplug/fast_lane_load "220"
+		# write /sys/module/msm_hotplug/cpus_boosted "5"
+		# write /sys/module/msm_hotplug/min_cpus_online "2"
+		
+# 省电模式
+on property:persist.spectrum.profile=3
+		write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor "realmeutil"
+		write /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq "1766400"
+		write /sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq "2246400"
+		write /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq "403200"
+		write /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor "realmeutil"
+		# write /sys/devices/system/cpu/cpufreq/policy0/schedutil/powersave "1"
+		# write /sys/devices/system/cpu/cpufreq/policy4/schedutil/powersave "1"
+		# write /sys/devices/system/cpu/cpufreq/policy0/schedutil/performance "0"
+		# write /sys/devices/system/cpu/cpufreq/policy4/schedutil/performance "0"
+		write /sys/module/cpu_input_boost/parameters/input_boost_freq_lp "1056000"
+		write /sys/module/cpu_input_boost/parameters/remove_input_boost_freq_lp "403200"
+		write /sys/module/cpu_input_boost/parameters/dynamic_stune_boost "15"
+		write /sys/module/cpu_input_boost/parameters/input_boost_duration "180"
+		write /sys/module/cpu_input_boost/parameters/wake_boost_duration "1500"
+		# write /sys/devices/system/cpu/cpufreq/policy0/schedutil/iowait_boost_enable "0"
+		# write /sys/devices/system/cpu/cpufreq/policy4/schedutil/iowait_boost_enable "0"
+		# write /sys/devices/system/cpu/cpufreq/policy0/schedutil/up_rate_limit_us "500"
+		# write /sys/devices/system/cpu/cpufreq/policy0/schedutil/down_rate_limit_us "2000"
+		# write /sys/devices/system/cpu/cpufreq/policy4/schedutil/up_rate_limit_us "500"
+		# write /sys/devices/system/cpu/cpufreq/policy4/schedutil/down_rate_limit_us "2000"
+		# write /sys/devices/system/cpu/cpu0/cpufreq/schedutil/up_rate_limit_us "500"
+		# write /sys/devices/system/cpu/cpu4/cpufreq/schedutil/up_rate_limit_us "500"
+		# write /sys/devices/system/cpu/cpu0/cpufreq/schedutil/down_rate_limit_us "2000"
+		# write /sys/devices/system/cpu/cpu4/cpufreq/schedutil/down_rate_limit_us "2000"
+		write /sys/module/msm_performance/parameters/touchboost "0"
+		write /sys/module/drm/parameters/frame_boost "N"
+		write /sys/block/sda/queue/read_ahead_kb "128"
+		write /sys/block/sda/queue/scheduler "zen"
+		write /sys/class/kgsl/kgsl-3d0/max_gpuclk "675000000"
+		write /sys/class/kgsl/kgsl-3d0/devfreq/min_freq "180000000"
+		write /sys/class/kgsl/kgsl-3d0/default_pwrlevel 8
+		write /sys/class/kgsl/kgsl-3d0/max_pwrlevel 2
+		write /sys/class/kgsl/kgsl-3d0/min_pwrlevel 8
+		write /sys/module/sync/parameters/fsync_enabled Y
+		write /sys/class/kgsl/kgsl-3d0/devfreq/adrenoboost 0
+		# start /vendor/bin/thermal-engine
+		# write /sys/kernel/sound_control/mic_gain "1"
+		# write /sys/module/msm_drm/parameters/backlight_max "4095"
+		# write /sys/module/msm_drm/parameters/framerate_override "2"
+		# write /sys/class/leds/vibrator/vmax_override "1"
+		# write /sys/module/msm_hotplug/max_cpus_online_susp "1"
+		# write /sys/module/msm_hotplug/io_is_busy "0"
+		# write /sys/module/msm_hotplug/offline_load "0"
+		# write /sys/module/msm_hotplug/fast_lane_load "180"
+		# write /sys/module/msm_hotplug/cpus_boosted "3"
+		# write /sys/module/msm_hotplug/min_cpus_online "1"
+		
+# 游戏模式
+on property:persist.spectrum.profile=4
+		write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor "schedutil"
+		write /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq "1766400"
+		write /sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq "2803200"
+		write /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq "1056000"
+		write /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor "schedutil"
+		write /sys/devices/system/cpu/cpufreq/policy0/schedutil/powersave "0"
+		write /sys/devices/system/cpu/cpufreq/policy4/schedutil/powersave "0"
+		write /sys/devices/system/cpu/cpufreq/policy0/schedutil/performance "0"
+		write /sys/devices/system/cpu/cpufreq/policy4/schedutil/performance "1"
+		write /sys/module/cpu_input_boost/parameters/input_boost_freq_lp "1516800"
+		write /sys/module/cpu_input_boost/parameters/remove_input_boost_freq_lp "1056000"
+		write /sys/module/cpu_input_boost/parameters/dynamic_stune_boost "50"
+		write /sys/module/cpu_input_boost/parameters/input_boost_duration "250"
+		write /sys/module/cpu_input_boost/parameters/wake_boost_duration "1500"
+		write /sys/devices/system/cpu/cpufreq/policy0/schedutil/iowait_boost_enable "1"
+		write /sys/devices/system/cpu/cpufreq/policy4/schedutil/iowait_boost_enable "1"
+		write /sys/devices/system/cpu/cpufreq/policy0/schedutil/up_rate_limit_us "500"
+		write /sys/devices/system/cpu/cpufreq/policy0/schedutil/down_rate_limit_us "20000"
+		write /sys/devices/system/cpu/cpufreq/policy4/schedutil/up_rate_limit_us "500"
+		write /sys/devices/system/cpu/cpufreq/policy4/schedutil/down_rate_limit_us "20000"
+		# write /sys/devices/system/cpu/cpu0/cpufreq/schedutil/up_rate_limit_us "250"
+		# write /sys/devices/system/cpu/cpu4/cpufreq/schedutil/up_rate_limit_us "250"
+		# write /sys/devices/system/cpu/cpu0/cpufreq/schedutil/down_rate_limit_us "10000"
+		# write /sys/devices/system/cpu/cpu4/cpufreq/schedutil/down_rate_limit_us "10000"
+		write /sys/module/msm_performance/parameters/touchboost "1"
+		write /sys/module/drm/parameters/frame_boost "Y"
+		write /sys/block/sda/queue/read_ahead_kb "128"
+		write /sys/block/sda/queue/scheduler "noop"
+		write /sys/class/kgsl/kgsl-3d0/max_gpuclk "810000000"
+		write /sys/class/kgsl/kgsl-3d0/devfreq/min_freq "342000000"
+		write /sys/class/kgsl/kgsl-3d0/default_pwrlevel 6
+		write /sys/class/kgsl/kgsl-3d0/max_pwrlevel 0
+		write /sys/class/kgsl/kgsl-3d0/min_pwrlevel 6
+		write /sys/module/sync/parameters/fsync_enabled N
+		write /sys/class/kgsl/kgsl-3d0/devfreq/adrenoboost 1
+		# killall -9 thermal-engine
+		# write /sys/kernel/sound_control/mic_gain "3"
+		# write /sys/module/msm_drm/parameters/backlight_max "4200"
+		# write /sys/module/msm_drm/parameters/framerate_override "0"
+		# write /sys/class/leds/vibrator/vmax_override "1"
+		# write /sys/module/msm_hotplug/max_cpus_online_susp "1"
+		# write /sys/module/msm_hotplug/io_is_busy "0"
+		# write /sys/module/msm_hotplug/offline_load "0"
+		# write /sys/module/msm_hotplug/fast_lane_load "320"
+		# write /sys/module/msm_hotplug/cpus_boosted "7"
+		# write /sys/module/msm_hotplug/min_cpus_online "3"
+		
+# 性能模式
+on property:persist.spectrum.profile=5
+		write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor "performance"
+		write /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq "1766400"
+		write /sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq "2803200"
+		write /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq "1766400"
+		write /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor "performance"
+		write /sys/devices/system/cpu/cpufreq/policy0/schedutil/powersave "0"
+		write /sys/devices/system/cpu/cpufreq/policy4/schedutil/powersave "0"
+		write /sys/devices/system/cpu/cpufreq/policy0/schedutil/performance "1"
+		write /sys/devices/system/cpu/cpufreq/policy4/schedutil/performance "1"
+		write /sys/module/cpu_input_boost/parameters/input_boost_freq_lp "1766400"
+		write /sys/module/cpu_input_boost/parameters/remove_input_boost_freq_lp "1766400"
+		write /sys/module/cpu_input_boost/parameters/dynamic_stune_boost "100"
+		write /sys/module/cpu_input_boost/parameters/input_boost_duration "320"
+		write /sys/module/cpu_input_boost/parameters/wake_boost_duration "3000"
+		# write /sys/devices/system/cpu/cpufreq/policy0/schedutil/iowait_boost_enable "0"
+		# write /sys/devices/system/cpu/cpufreq/policy4/schedutil/iowait_boost_enable "0"
+		# write /sys/devices/system/cpu/cpufreq/policy0/schedutil/up_rate_limit_us "500"
+		# write /sys/devices/system/cpu/cpufreq/policy0/schedutil/down_rate_limit_us "2000"
+		# write /sys/devices/system/cpu/cpufreq/policy4/schedutil/up_rate_limit_us "500"
+		# write /sys/devices/system/cpu/cpufreq/policy4/schedutil/down_rate_limit_us "2000"
+		# write /sys/devices/system/cpu/cpu0/cpufreq/schedutil/up_rate_limit_us "100"
+		# write /sys/devices/system/cpu/cpu4/cpufreq/schedutil/up_rate_limit_us "100"
+		# write /sys/devices/system/cpu/cpu0/cpufreq/schedutil/down_rate_limit_us "20000"
+		# write /sys/devices/system/cpu/cpu4/cpufreq/schedutil/down_rate_limit_us "20000"
+		write /sys/module/msm_performance/parameters/touchboost "1"
+		write /sys/module/drm/parameters/frame_boost "Y"
+		write /sys/block/sda/queue/read_ahead_kb "128"
+		write /sys/block/sda/queue/scheduler "noop"
+		write /sys/class/kgsl/kgsl-3d0/max_gpuclk "810000000"
+		write /sys/class/kgsl/kgsl-3d0/devfreq/min_freq "810000000"
+		write /sys/class/kgsl/kgsl-3d0/default_pwrlevel 0
+		write /sys/class/kgsl/kgsl-3d0/max_pwrlevel 0
+		write /sys/class/kgsl/kgsl-3d0/min_pwrlevel 0
+		write /sys/module/sync/parameters/fsync_enabled N
+		write /sys/class/kgsl/kgsl-3d0/devfreq/adrenoboost 3
+		# killall -9 thermal-engine
+		# write /sys/kernel/sound_control/mic_gain "1"
+		# write /sys/module/msm_drm/parameters/backlight_max "4200"
+		# write /sys/module/msm_drm/parameters/framerate_override "0"
+		# write /sys/class/leds/vibrator/vmax_override "1"
+		# write /sys/module/msm_hotplug/max_cpus_online_susp "1"
+		# write /sys/module/msm_hotplug/io_is_busy "0"
+		# write /sys/module/msm_hotplug/offline_load "0"
+		# write /sys/module/msm_hotplug/fast_lane_load "0"
+		# write /sys/module/msm_hotplug/cpus_boosted "7"
+		# write /sys/module/msm_hotplug/min_cpus_online "7"
+# SticKernel
