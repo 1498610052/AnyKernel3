@@ -7,9 +7,9 @@ do.modules=0
 do.systemless=1
 do.cleanup=1
 do.cleanuponabort=0
-device.name1=sagit
-device.name2=chiron
-supported.versions=9
+device.name1=
+device.name2=
+supported.versions=
 '; } # end properties
 
 # shell variables
