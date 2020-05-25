@@ -1,7 +1,7 @@
 ## AnyKernel setup
 # begin properties
 properties() { '
-kernel.string=Fiee-sagit for sagit MIUI
+kernel.string=Fiee-Kernel 
 do.devicecheck=1
 do.modules=0
 do.systemless=1
